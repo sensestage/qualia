@@ -33,7 +33,7 @@ public:
   Observation currentObservation;
   // should change to RLObservation later
 
-  DataNetworkEnvironment(); // give input pars:
+  DataNetworkEnvironment(const char *hostip, const char *myport, const char *myName, int audioid, int lightid, int settingsid, int outputid ); // give input pars:
   // light sense node, audio sense node
   // output node
   // host ip, port, name
@@ -46,11 +46,14 @@ public:
 
 private:
   DataNetwork * dn;
-  DataNode * node21;
-  DataNode * node37;
-  DataNode * delayNode;
-
+  
+  DataNode * audioNode;
+  DataNode * lightNode;
+  
+  DataNode * settingsNode;
   DataNode * outNode;
+  
+  int audioid, lightid, settingsid, outputid;
 
 };
 

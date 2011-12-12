@@ -23,32 +23,41 @@
 #include <stdio.h>
 
 // the number after currentObservation is the number of inputs, data we listen to
-DataNetworkEnvironment::DataNetworkEnvironment() : currentObservation(3) {
+DataNetworkEnvironment::DataNetworkEnvironment(const char *hostip, const char *myport, const char *myName, int auid, int liid, int setid, int outid) : currentObservation(3) {
+  
+  audioid = auid;
+  lightid = liid;
+  settingsid = setid;
+  outputid = outid;
+  
+  // create a data network:
+    dn = new DataNetwork();
+  // create an osc client interface for it:
+    dn->createOSC( hostip, myport, myName );
+  // register with the host:
+    dn->registerMe();
+
+    // subscribe to nodes of interest:
+    dn->subscribeNode( audioid, true );
+    dn->subscribeNode( lightid, true );
+    dn->subscribeNode( settingsid, true );
+
+    // create a node:
+    dn->createNode( outputid, myName, 2, 0, true );
+
+    
+    
+    settingsNode = dn->getNode( settingsid );
+    audioNode = dn->getNode( audioid );
+    lightNode = dn->getNode( lightid );
+    outNode = dn->getNode( outputid );
+    
 }
 
 // here the environment is initialised, so registering with the data network,
 // subscribing to the DataNodes, creating our DataNode
 void DataNetworkEnvironment::init() {
   printf("Initializing\n");
-  // create a data network:
-    dn = new DataNetwork();
-  // create an osc client interface for it:
-    dn->createOSC( "127.0.0.1", "7000", "qualia" );
-  // register with the host:
-    dn->registerMe();
-
-    // subscribe to nodes of interest:
-    dn->subscribeNode( 22, true );
-    // subscribe to nodes of interest:
-    dn->subscribeNode( 37, true );
-
-	// create a node:
-    dn->createNode( 5001, "qualia1", 2, 0, true );
-
-    delayNode = dn->getNode( 6001 );
-    node21 = dn->getNode( 22 );
-    node37 = dn->getNode( 37 );
-    outNode = dn->getNode( 5001 );
 }
 
 Observation* DataNetworkEnvironment::start() {
@@ -59,32 +68,51 @@ Observation* DataNetworkEnvironment::start() {
 
 Observation* DataNetworkEnvironment::step(const Action* action) {
   printf("Stepping env\n");
-  printf("--> sending %d\n", action->actions[0]);
+  printf("--> sending %d, %d\n", action->actions[0], action->actions[1]);
 
   float outData[2];
 	// set data to the node:
   for ( int i=0; i<2; i++ ){
-	  outData[i] = (float) action->actions[i];
+    outData[i] = (float) action->actions[i];
   }
   outNode->setData( 2, outData );
 	// send the data to the network:
   outNode->send( true );
 
-  sleep( 1 );
+  if ( settingsNode == NULL ){
+    settingsNode = dn->getNode( settingsid );
+  }
+  
+  float delay = 1;
+  if ( settingsNode != NULL ){
+    delay = settingsNode->getSlot(0)->getValue();
+  }
+  sleep( delay );
 
-  float * nodeData21 = node21->getData();
-  float * nodeData37 = node37->getData();
   int cnt = 0;
-  for ( int i=0; i<node21->size(); i++ ){
-	  currentObservation[cnt] = nodeData21[i];
-	  cnt++;
+  if ( audioNode == NULL ){
+    audioNode = dn->getNode( audioid );
   }
-  for ( int i=0; i<node37->size(); i++ ){
-	  currentObservation[cnt] = nodeData37[i];
-	  cnt++;
+  if ( audioNode != NULL ){
+    float * nodeDataAu = audioNode->getData();
+    for ( int i=0; i<audioNode->size(); i++ ){
+      currentObservation[cnt] = nodeDataAu[i];
+      cnt++;
+    }
   }
+  if ( lightNode == NULL ){
+    lightNode = dn->getNode( lightid );
+  }
+  if ( lightNode != NULL ){
+    float * nodeDataLi = lightNode->getData();
+    for ( int i=0; i<lightNode->size(); i++ ){
+      currentObservation[cnt] = nodeDataLi[i];
+      cnt++;
+    }
+  }
+  float * nodeDataLi = lightNode->getData();
 
-  printf("--> receiving %f\n", currentObservation[0]);
+  printf("--> receiving %f, %f, %f\n", currentObservation[0], currentObservation[1], currentObservation[2]);
   //usleep(100);
   return &currentObservation;
 }
