@@ -1,0 +1,23 @@
+CONFIG = ['INCLUDE_PATH', 'MCU', 'F_CPU', 'EXTRA_LIBS', 'AVR_GCC_DIR', 'MODE', 'TARGET', 'LIBS', 'LIBPATH']
+
+Import(CONFIG)
+
+if (MODE == 'computer'):
+  INCLUDE_PATH = "/home/nescivi/versioncontrol/git/emerge/qualia:/usr/local/include/libdatanetwork"
+  LIBS = "libdatanetwork,liblo"
+else:
+  INCLUDE_PATH = "/home/nescivi/versioncontrol/git/emerge/qualia:/home/nescivi/Downloads/arduino-0022-build/arduino-0022/hardware/tools/avr/avr/include/"
+
+MCU = 'atmega328p'
+F_CPU = 16000000
+EXTRA_LIBS = ""
+
+if (MODE == 'avr'):
+  AVR_GCC_DIR = "/home/nescivi/Downloads/arduino-0022-build/arduino-0022/hardware/tools/avr/bin/"
+
+if (MODE == 'arduino'):
+  TARGET = 'SimpleFirmware'
+else:
+  TARGET = "main_test"
+
+Return(CONFIG)
