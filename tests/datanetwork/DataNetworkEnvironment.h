@@ -1,6 +1,7 @@
 /*
- * LibMapperEnvironment.h
+ * DataNetworkEnvironment.h
  *
+ * (c) 2011 Marije Baalman -- nescivi(@)gmail(.)com
  * (c) 2011 Sofian Audry -- info(@)sofianaudry(.)com
  *
  * This program is free software: you can redistribute it and/or modify
