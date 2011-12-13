@@ -24,30 +24,29 @@
 #include <stdio.h>
 
 // the number after currentObservation is the number of inputs, data we listen to
-PolytopeAudioEnvironment::PolytopeAudioEnvironment(const char *hostip, const char *myport, const char *myName, int auid, int setid, int outid) : currentObservation(1) {
+PolytopeAudioEnvironment::PolytopeAudioEnvironment( DataNetwork * d, const char *myName, int auid, int outid) : currentObservation(1) {
   
+  dn = d;
+  delay = 1.;
+
   audioid = auid;
-  settingsid = setid;
   outputid = outid;
   
-  // create a data network:
-    dn = new DataNetwork();
-  // create an osc client interface for it:
-    dn->createOSC( hostip, myport, myName );
-  // register with the host:
-    dn->registerMe();
-
     // subscribe to nodes of interest:
     dn->subscribeNode( audioid, true );
-    dn->subscribeNode( settingsid, true );
+//     dn->subscribeNode( settingsid, true );
 
     // create a node:
     dn->createNode( outputid, myName, 2, 0, true );
     
-    settingsNode = dn->getNode( settingsid );
+//     settingsNode = dn->getNode( settingsid );
     audioNode = dn->getNode( audioid );
     outNode = dn->getNode( outputid );
     
+}
+
+void PolytopeAudioEnvironment::set_delay( float d ){
+  delay = d;
 }
 
 // here the environment is initialised, so registering with the data network,
@@ -75,27 +74,23 @@ Observation* PolytopeAudioEnvironment::step(const Action* action) {
 	// send the data to the network:
   outNode->send( true );
 
-  if ( settingsNode == NULL ){
-    settingsNode = dn->getNode( settingsid );
-  }
-  
-  float delay = 1;
-  if ( settingsNode != NULL ){
-    delay = settingsNode->getSlot(0)->getValue();
-  }
   sleep( delay );
 
-  int cnt = 0;
+//   int cnt = 0;
+  float reward = 0;
   if ( audioNode == NULL ){
     audioNode = dn->getNode( audioid );
   }
   if ( audioNode != NULL ){
     float * nodeDataAu = audioNode->getData();
     for ( int i=0; i<audioNode->size(); i++ ){
-      currentObservation[cnt] = nodeDataAu[i];
-      cnt++;
+      currentObservation[i] = nodeDataAu[i];
+      reward += nodeDataAu[i];
     }
   }
+
+  // More noise is good
+  currentObservation.reward = reward;
 
 //   printf("--> receiving %f\n", currentObservation[0] );
   //usleep(100);

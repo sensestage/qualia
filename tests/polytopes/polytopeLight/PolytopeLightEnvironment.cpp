@@ -24,32 +24,26 @@
 #include <stdio.h>
 
 // the number after currentObservation is the number of inputs, data we listen to
-PolytopeLightEnvironment::PolytopeLightEnvironment(const char *hostip, const char *myport, const char *myName, int liid, int setid, int outid) : currentObservation(2) {
+PolytopeLightEnvironment::PolytopeLightEnvironment( DataNetwork * d, const char* myName, int liid, int outid) : currentObservation(2) {
   
   lightid = liid;
-  settingsid = setid;
   outputid = outid;
+  dn = d;
+  delay = 1.;
   
-  // create a data network:
-    dn = new DataNetwork();
-  // create an osc client interface for it:
-    dn->createOSC( hostip, myport, myName );
-  // register with the host:
-    dn->registerMe();
-
     // subscribe to nodes of interest:
     dn->subscribeNode( lightid, true );
-    dn->subscribeNode( settingsid, true );
 
     // create a node:
     dn->createNode( outputid, myName, 2, 0, true );
 
-    settingsNode = dn->getNode( settingsid );
-    lightNode = dn->getNode( lightid );
-    outNode = dn->getNode( outputid );
-    
+    outNode = dn->getNode( outputid );    
 }
 
+void PolytopeLightEnvironment::set_delay( float d ){
+  delay = d;
+}
+  
 // here the environment is initialised, so registering with the data network,
 // subscribing to the DataNodes, creating our DataNode
 void PolytopeLightEnvironment::init() {
@@ -75,16 +69,9 @@ Observation* PolytopeLightEnvironment::step(const Action* action) {
 	// send the data to the network:
   outNode->send( true );
 
-  if ( settingsNode == NULL ){
-    settingsNode = dn->getNode( settingsid );
-  }
-  
-  float delay = 1;
-  if ( settingsNode != NULL ){
-    delay = settingsNode->getSlot(0)->getValue();
-  }
   sleep( delay );
 
+  float reward = 0;
   if ( lightNode == NULL ){
     lightNode = dn->getNode( lightid );
   }
@@ -92,7 +79,10 @@ Observation* PolytopeLightEnvironment::step(const Action* action) {
     float * nodeDataLi = lightNode->getData();
     for ( int i=0; i<lightNode->size(); i++ ){
       currentObservation[i] = nodeDataLi[i];
+      reward += nodeDataLi[i];
     }
+    // Darkness reward.
+    currentObservation.reward = (lightNode->size() - reward);
   }
 
 //   printf("--> receiving %f, %f\n", currentObservation[0], currentObservation[1]);

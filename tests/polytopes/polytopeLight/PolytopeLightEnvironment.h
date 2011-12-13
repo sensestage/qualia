@@ -25,19 +25,22 @@
 #include "datanetwork.h"
 
 #include "Environment.h"
+#include "RLObservation.h"
 
 /// this is the namespace used by the datanetwork classes
 using namespace SWDataNetwork;
 
 class PolytopeLightEnvironment : public Environment {
 public:
-  Observation currentObservation;
+  RLObservation currentObservation;
   // should change to RLObservation later
 
-  PolytopeLightEnvironment(const char *hostip, const char *myport, const char *myName, int lightid, int settingsid, int outputid ); // give input pars:
+  PolytopeLightEnvironment( DataNetwork * d, const char * myName, int lightid, int outputid ); // give input pars:
   // light sense node, audio sense node
   // output node
   // host ip, port, name
+  
+  void set_delay( float );
 
   virtual void init();
   virtual Observation* start();
@@ -50,11 +53,11 @@ private:
   
   DataNode * lightNode;
   
-  DataNode * settingsNode;
   DataNode * outNode;
   
-  int lightid, settingsid, outputid;
+  int lightid, outputid;
 
+  float delay;
 };
 
 #endif /* PolytopeLightEnvIRONMENT_H_ */
