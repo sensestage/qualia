@@ -1,20 +1,21 @@
 //#include "cpp_include.h"
 
 #include "Qualia.h"
-#include "DummyAgent.h"
-//#include "QLearningAgent.h"
-//#include "QLearningEGreedyPolicy.h"
-#include "DataNetworkEnvironment.h"
-//#include "NeuralNetwork.h"
-//#include "RLQualia.h"
+// #include "DummyAgent.h"
+
+#include "QLearningAgent.h"
+#include "QLearningEGreedyPolicy.h"
+#include "PolytopeAudioEnvironment.h"
+#include "NeuralNetwork.h"
+// #include "RLQualia.h"
 
 //#define STATIC_ALLOCATOR_SIZE 10000
 //#include "StaticAllocator.h"
 
-//#define N_HIDDEN 3
-#define DIM_OBSERVATIONS 3
-//#define DIM_ACTIONS 2
-//const unsigned int n_actions[] = { 2, 2 };
+#define N_HIDDEN 3
+#define DIM_OBSERVATIONS 1
+#define DIM_ACTIONS 2
+const unsigned int n_actions[] = { 255, 255 };
 
 #include <stdio.h>
 
@@ -28,20 +29,20 @@ int main(int argc, char *argv[]) {
     printf( "port (e.g. 7000), the port this client will use for OSC messages\n");
     printf( "name (e.g. example_client), the name by which this client will be identified in the DataNetwork\n");
     printf( "For example:\n");
-    printf( "%s 127.0.0.1 7000 QualiaClient 1 37 4001 5001\n", argv[0]); 
+    printf( "%s 127.0.0.1 7000 QualiaClient 1 4001 5001\n", argv[0]); 
     return EXIT_SUCCESS;
   }
 
   
   //Alloc::init(&myAlloc);
-  DummyAgent agent;
-//  QLearningEGreedyPolicy egreedy(0.1f);
-//  NeuralNetwork net(DIM_OBSERVATIONS + DIM_ACTIONS, N_HIDDEN, 1, 0.1f);
-//  QLearningAgent agent(&net, DIM_OBSERVATIONS, DIM_ACTIONS, n_actions,
-//                       1.0f, 0.1f, &egreedy, false); // lambda = 1.0 => no history
-  DataNetworkEnvironment * env = new DataNetworkEnvironment( argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]), atoi(argv[7]) ); 
+//   DummyAgent agent;
+  QLearningEGreedyPolicy egreedy(0.1f);
+  NeuralNetwork net(DIM_OBSERVATIONS + DIM_ACTIONS, N_HIDDEN, 1, 0.1f);
+  QLearningAgent agent(&net, DIM_OBSERVATIONS, DIM_ACTIONS, n_actions,
+                       1.0f, 0.1f, &egreedy, false); // lambda = 1.0 => no history
+  PolytopeAudioEnvironment * env = new PolytopeAudioEnvironment( argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]) ); 
   Qualia qualia(&agent, env);
-//  RLQualia qualia(&agent, &env);
+//   RLQualia qualia(&agent, &env);
 
   qualia.init();
   qualia.start();
@@ -50,8 +51,8 @@ int main(int argc, char *argv[]) {
 //  for (int i=0; i<10; i++) {
     qualia.step();
 #if is_computer()
-    printf("Current agent action: %d\n", agent.currentAction.conflated());
-    printf("Current environment observation: %f %f %f\n", (double)env->currentObservation.observations[0], (double)env->currentObservation.observations[1], (double)env->currentObservation.observations[2]);
+//     printf("Current agent action: %d\n", agent.currentAction.conflated());
+//     printf("Current environment observation: %f\n", (double)env->currentObservation.observations[0]);
 #endif
   }
 

@@ -24,7 +24,7 @@
 #include "Agent.h"
 //#include <stdio.h>
 
-const unsigned int DUMMY_AGENT_N_ACTIONS[] = { 2, 2 };
+const unsigned int DUMMY_AGENT_N_ACTIONS[] = { 255, 255 };
 #define DUMMY_AGENT_ACTIONS_DIM 2
 
 class DummyAgent : public Agent {

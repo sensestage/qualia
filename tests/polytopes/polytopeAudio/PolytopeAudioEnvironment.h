@@ -1,5 +1,5 @@
 /*
- * DataNetworkEnvironment.h
+ * PolytopeAudioEnvironment.h
  *
  * (c) 2011 Marije Baalman -- nescivi(@)gmail(.)com
  * (c) 2011 Sofian Audry -- info(@)sofianaudry(.)com
@@ -18,8 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATANETWORKENVIRONMENT_H_
-#define DATANETWORKENVIRONMENT_H_
+#ifndef PolytopeAudioEnvIRONMENT_H_
+#define PolytopeAudioEnvIRONMENT_H_
 
 /// this is the only file we need to include to interact with the datanetwork
 #include "datanetwork.h"
@@ -29,12 +29,12 @@
 /// this is the namespace used by the datanetwork classes
 using namespace SWDataNetwork;
 
-class DataNetworkEnvironment : public Environment {
+class PolytopeAudioEnvironment : public Environment {
 public:
   Observation currentObservation;
   // should change to RLObservation later
 
-  DataNetworkEnvironment(const char *hostip, const char *myport, const char *myName, int audioid, int lightid, int settingsid, int outputid ); // give input pars:
+  PolytopeAudioEnvironment(const char *hostip, const char *myport, const char *myName, int audioid, int settingsid, int outputid ); // give input pars:
   // light sense node, audio sense node
   // output node
   // host ip, port, name
@@ -49,13 +49,12 @@ private:
   DataNetwork * dn;
   
   DataNode * audioNode;
-  DataNode * lightNode;
   
   DataNode * settingsNode;
   DataNode * outNode;
   
-  int audioid, lightid, settingsid, outputid;
+  int audioid, settingsid, outputid;
 
 };
 
-#endif /* DATANETWORKENVIRONMENT_H_ */
+#endif /* PolytopeAudioEnvIRONMENT_H_ */
