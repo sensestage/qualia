@@ -24,3 +24,7 @@ a.out
 
 # OS X
 .DS_Store
+
+# temp files
+*.*~
+*~
