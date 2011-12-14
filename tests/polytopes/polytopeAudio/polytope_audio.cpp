@@ -17,8 +17,8 @@
 
 // #define N_HIDDEN 3
 #define DIM_OBSERVATIONS 1
-#define DIM_ACTIONS 2
-const unsigned int n_actions[] = { 255, 255 };
+#define DIM_ACTIONS 3
+const unsigned int n_actions[] = { 3, 255, 30 }; // [sound off, noise, wavetable], [ freq/noiseamp ], [rate]
 
 #include <stdio.h>
 
@@ -35,12 +35,9 @@ int main(int argc, char *argv[]) {
     printf( "port (e.g. 7000), the port this client will use for OSC messages\n");
     printf( "name (e.g. example_client), the name by which this client will be identified in the DataNetwork\n");
     printf( "node for audio input data, node for settings, node for output\n");
-    printf( "lambda, gamma, epsilon, learning rate, hidden layers\n");
+    printf( "lambda, gamma, epsilon, learning rate, hidden layers, reward node\n");
     printf( "For example:\n");
-    printf( "%s 127.0.0.1 7000 QualiaClient 37 4001 5001 0.9 0.1 0.5 0.1 3\n", argv[0]); 
-
-    printf( "For example:\n");
-    printf( "%s 127.0.0.1 7000 QualiaClient 1 4001 5001\n", argv[0]); 
+    printf( "%s 127.0.0.1 7000 QualiaClient 37 4001 5001 0.9 0.1 0.5 0.1 3 6001\n", argv[0]); 
     return EXIT_SUCCESS;
   }
 
@@ -51,7 +48,7 @@ int main(int argc, char *argv[]) {
   int n_hidden = atoi( argv[11] );
 
   float settingsid = atoi( argv[5] );
-  DataNode * settingsNode;
+  DataNode * settingsNode = NULL;
   
   // initialise datanetwork:
   // create a data network:
@@ -69,7 +66,7 @@ int main(int argc, char *argv[]) {
   NeuralNetwork net(DIM_OBSERVATIONS + DIM_ACTIONS, n_hidden, 1, learning);
   QLearningAgent agent(&net, DIM_OBSERVATIONS, DIM_ACTIONS, n_actions, lambda, gamma, &egreedy, false);
 
-  PolytopeAudioEnvironment * env = new PolytopeAudioEnvironment( dn, argv[3], atoi(argv[4]), atoi(argv[6]) ); 
+  PolytopeAudioEnvironment * env = new PolytopeAudioEnvironment( dn, argv[3], atoi(argv[4]), atoi(argv[12]), atoi(argv[6]) ); 
   RLQualia qualia(&agent, env);
 //   RLQualia qualia(&agent, &env);
 
@@ -81,6 +78,7 @@ int main(int argc, char *argv[]) {
       settingsNode = dn->getNode( settingsid );
     }
     if ( settingsNode != NULL ){
+      printf( "%i", settingsNode->size() );
       env->set_delay( settingsNode->getSlot(0)->getValue() );
       agent.lambda = settingsNode->getSlot(1)->getValue();
       agent.gamma = settingsNode->getSlot(2)->getValue();

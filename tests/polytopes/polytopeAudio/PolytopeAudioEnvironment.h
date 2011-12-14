@@ -35,7 +35,7 @@ public:
   RLObservation currentObservation;
   // should change to RLObservation later
 
-  PolytopeAudioEnvironment( DataNetwork * d, const char *myName, int audioid, int outputid ); // give input pars:
+  PolytopeAudioEnvironment( DataNetwork * d, const char *myName, int, int, int ); // give input pars:
   // light sense node, audio sense node
   // output node
   // host ip, port, name
@@ -52,11 +52,12 @@ private:
   DataNetwork * dn;
   
   DataNode * audioNode;
+  DataNode * rewardNode;
   
 //   DataNode * settingsNode;
   DataNode * outNode;
   
-  int audioid, outputid;
+  int audioid, outputid, rewardid;
   
   float delay;
 

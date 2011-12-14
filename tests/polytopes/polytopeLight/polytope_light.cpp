@@ -35,9 +35,9 @@ int main(int argc, char *argv[]) {
     printf( "port (e.g. 7000), the port this client will use for OSC messages\n");
     printf( "name (e.g. example_client), the name by which this client will be identified in the DataNetwork\n");
     printf( "node for light input data, node for settings, node for output\n");
-    printf( "lambda, gamma, epsilon, learning rate, hidden layers\n");
+    printf( "lambda, gamma, epsilon, learning rate, hidden layers, reward node\n");
     printf( "For example:\n");
-    printf( "%s 127.0.0.1 7000 QualiaClient 37 4001 5001 0.9 0.1 0.5 0.1 3\n", argv[0]); 
+    printf( "%s 127.0.0.1 7000 QualiaClient 37 4001 5001 0.9 0.1 0.5 0.1 3 3001\n", argv[0]); 
     return EXIT_SUCCESS;
   }
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
   int n_hidden = atoi( argv[11] );
 
   float settingsid = atoi( argv[5] );
-  DataNode * settingsNode;
+  DataNode * settingsNode = NULL;
   
   // initialise datanetwork:
   // create a data network:
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
   QLearningAgent agent(&net, DIM_OBSERVATIONS, DIM_ACTIONS, n_actions, lambda, gamma, &egreedy, false);
   // lambda = 1.0 => no history
   // gamma
-  PolytopeLightEnvironment * env = new PolytopeLightEnvironment( dn, argv[3], atoi(argv[4]), atoi(argv[6]) );
+  PolytopeLightEnvironment * env = new PolytopeLightEnvironment( dn, argv[3], atoi(argv[4]), atoi(argv[12]), atoi(argv[6]) );
   Qualia qualia(&agent, env);
 //  RLQualia qualia(&agent, &env);
 

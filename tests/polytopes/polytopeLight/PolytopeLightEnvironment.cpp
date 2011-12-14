@@ -24,18 +24,24 @@
 #include <stdio.h>
 
 // the number after currentObservation is the number of inputs, data we listen to
-PolytopeLightEnvironment::PolytopeLightEnvironment( DataNetwork * d, const char* myName, int liid, int outid) : currentObservation(2) {
+PolytopeLightEnvironment::PolytopeLightEnvironment( DataNetwork * d, const char* myName, int liid, int rewid, int outid) : currentObservation(2) {
   
   lightid = liid;
   outputid = outid;
   dn = d;
   delay = 1.;
+  rewardid = rewid;  
   
     // subscribe to nodes of interest:
     dn->subscribeNode( lightid, true );
+    dn->subscribeNode( rewardid, true );
 
     // create a node:
     dn->createNode( outputid, myName, 2, 0, true );
+
+    lightNode = dn->getNode( lightid );
+
+    rewardNode = dn->getNode( rewardid );
 
     outNode = dn->getNode( outputid );    
 }
@@ -71,7 +77,6 @@ Observation* PolytopeLightEnvironment::step(const Action* action) {
 
   sleep( delay );
 
-  float reward = 0;
   if ( lightNode == NULL ){
     lightNode = dn->getNode( lightid );
   }
@@ -79,11 +84,23 @@ Observation* PolytopeLightEnvironment::step(const Action* action) {
     float * nodeDataLi = lightNode->getData();
     for ( int i=0; i<lightNode->size(); i++ ){
       currentObservation[i] = nodeDataLi[i];
-      reward += nodeDataLi[i];
     }
-    // Darkness reward.
-    currentObservation.reward = (lightNode->size() - reward);
   }
+
+  float reward = 0;
+  if ( rewardNode == NULL ){
+    rewardNode = dn->getNode( rewardid );
+  }
+  if ( rewardNode != NULL ){
+    float * rewardData = rewardNode->getData();
+    for ( int i=0; i<rewardNode->size(); i++ ){
+//       currentObservation[i] = nodeDataAu[i];
+      reward += rewardData[i];
+    }
+  }
+
+    // Darkness reward.
+  currentObservation.reward = reward;
 
 //   printf("--> receiving %f, %f\n", currentObservation[0], currentObservation[1]);
   //usleep(100);
