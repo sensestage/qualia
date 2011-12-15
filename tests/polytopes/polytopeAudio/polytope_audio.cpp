@@ -25,9 +25,17 @@ const unsigned int n_actions[] = { 3, 255, 30 }; // [sound off, noise, wavetable
 /// this is the namespace used by the datanetwork classes
 using namespace SWDataNetwork;
 
+bool running;
+
+void quitNow(){
+  running = false;  
+}
+
 //unsigned char buffer[STATIC_ALLOCATOR_SIZE];
 //StaticAllocator myAlloc(buffer, STATIC_ALLOCATOR_SIZE);
 int main(int argc, char *argv[]) {
+  
+  running = true;
   
     if ( argc < 7 ){
     printf( "Start this DataNetwork Qualia client with 7 arguments:\n");
@@ -70,15 +78,17 @@ int main(int argc, char *argv[]) {
   RLQualia qualia(&agent, env);
 //   RLQualia qualia(&agent, &env);
 
+  dn->setQuitFunction( &quitNow );
+
   qualia.init();
   qualia.start();
 
-  for (;;) {
+  while ( running ) {
     if ( settingsNode == NULL ){
       settingsNode = dn->getNode( settingsid );
     }
     if ( settingsNode != NULL ){
-      printf( "%i", settingsNode->size() );
+//       printf( "%i", settingsNode->size() );
       env->set_delay( settingsNode->getSlot(0)->getValue() );
       agent.lambda = settingsNode->getSlot(1)->getValue();
       agent.gamma = settingsNode->getSlot(2)->getValue();
@@ -96,5 +106,6 @@ int main(int argc, char *argv[]) {
 //  if (myAlloc.nLeaks)
 //    printf("WARNING: Static Allocator has leaks: %d\n", myAlloc.nLeaks);
 
+  dn->unregisterMe();
   return 0;
 }

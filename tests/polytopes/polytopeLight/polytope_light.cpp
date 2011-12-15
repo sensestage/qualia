@@ -25,10 +25,17 @@ const unsigned int n_actions[] = { 4, 200 }; // { off, on, flash, flicker ; dura
 /// this is the namespace used by the datanetwork classes
 using namespace SWDataNetwork;
 
+bool running;
+
+void quitNow(){
+  running = false;  
+}
+
 //unsigned char buffer[STATIC_ALLOCATOR_SIZE];
 //StaticAllocator myAlloc(buffer, STATIC_ALLOCATOR_SIZE);
 int main(int argc, char *argv[]) {
-  
+    running = true;
+    
     if ( argc < 7 ){
     printf( "Start this DataNetwork Qualia client with 7 arguments:\n");
     printf( "host ip (e.g. 127.0.0.1), the IP address of the host running the DataNetwork server\n");
@@ -70,10 +77,12 @@ int main(int argc, char *argv[]) {
   Qualia qualia(&agent, env);
 //  RLQualia qualia(&agent, &env);
 
+  dn->setQuitFunction( &quitNow );
+
   qualia.init();
   qualia.start();
 
-  for (;;) {
+  while( running ) {
     if ( settingsNode == NULL ){
       settingsNode = dn->getNode( settingsid );
     }
@@ -96,6 +105,7 @@ int main(int argc, char *argv[]) {
 //  if (myAlloc.nLeaks)
 //    printf("WARNING: Static Allocator has leaks: %d\n", myAlloc.nLeaks);
 
+  dn->unregisterMe();
   return 0;
 }
 
